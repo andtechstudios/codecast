@@ -7,4 +7,9 @@
 		<Copyright>"© $(CompanyName) $([System.DateTime]::Now.ToString(`yyyy`))"</Copyright>
 		<TargetFramework>net6.0</TargetFramework>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Andtech.Common" Version="0.11.0" />
+		<PackageReference Include="CommandLineParser" Version="2.8.0" />
+	</ItemGroup>
 </Project>
