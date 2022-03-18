@@ -1,8 +1,7 @@
 env:
-  NUGET_SOURCE_URL: ${{secrets.GITLAB_PKG_URL}}/nuget
+  NUGET_SOURCE_URL: https://api.nuget.org/v3/index.json
   NUGET_PROJECT_DIR: src
-  NUGET_USER_NAME: ${{secrets.GITLAB_ACCESS_TOKEN_OWNER}}
-  NUGET_API_KEY: ${{secrets.GITLAB_ACCESS_TOKEN}}
+  NUGET_API_KEY: ${{secrets.NUGET_API_KEY}}
 
 on:
   create:
@@ -21,8 +20,7 @@ jobs:
       - run: |
           version=$(git tag -l --sort=-v:refname | head -n 1)
           version=${version/v/}
-          dotnet build --configuration Release "${{env.NUGET_PROJECT_DIR}}" /p:VersionPrefix="$version"
-          dotnet pack --configuration Release "${{env.NUGET_PROJECT_DIR}}" --no-build --output . /p:VersionPrefix="$version"
+          dotnet build --configuration Release "${{env.NUGET_PROJECT_DIR}}" /p:Version="$version"
+          dotnet pack --configuration Release "${{env.NUGET_PROJECT_DIR}}" --no-build --output . /p:Version="$version"
       - run: |
-          dotnet nuget add source "${{env.NUGET_SOURCE_URL}}/index.json" --name gitlab --username "${{env.NUGET_USER_NAME}}" --password "${{env.NUGET_API_KEY}}" --store-password-in-clear-text
-          dotnet nuget push *.nupkg --source gitlab --api-key "${{env.NUGET_API_KEY}}" --skip-duplicate
+          dotnet nuget push *.nupkg --source "${{env.NUGET_SOURCE_URL}}" --api-key "${{env.NUGET_API_KEY}}" --skip-duplicate
