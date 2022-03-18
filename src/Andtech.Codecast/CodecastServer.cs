@@ -15,28 +15,21 @@ namespace Andtech.Codecast
 
 		private CancellationTokenSource listenCTS;
 
-		public async Task RunAsync()
+		public async Task RunAsync(IPEndPoint endPoint)
 		{
-			// Establish the local endpoint for the socket.  
-			// Dns.GetHostName returns the name of the
-			// host running the application.  
-			IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-			IPAddress ipAddress = ipHostInfo.AddressList[0];
-			IPEndPoint localEndPoint = new IPEndPoint(ipAddress, Port);
-
-			// Create a TCP/IP socket.  
-			Socket socket = new Socket(ipAddress.AddressFamily,
+			// Create a TCP/IP socket.
+			Socket socket = new Socket(endPoint.Address.AddressFamily,
 				SocketType.Stream, ProtocolType.Tcp);
 
 			// Bind the socket to the local endpoint and
 			// listen for incoming connections.  
-			socket.Bind(localEndPoint);
+			socket.Bind(endPoint);
 			socket.Listen();
 
-			Log.WriteLine("Waiting for client...", Verbosity.verbose);
-			// Program is suspended while waiting for an incoming connection.  
+			Log.WriteLine($"Accepting client connection at endpoint {endPoint}...", Verbosity.verbose);
+			// Program is suspended while waiting for an incoming connection.
 			Socket handler = socket.Accept();
-			Log.WriteLine("Connection established...", ConsoleColor.Green, Verbosity.verbose);
+			Log.WriteLine("Connection established!", ConsoleColor.Green, Verbosity.verbose);
 
 			listenCTS?.Dispose();
 			listenCTS = new CancellationTokenSource();

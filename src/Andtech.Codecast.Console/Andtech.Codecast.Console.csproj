@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Authors>Andtech Studios</Authors>
+		<RepositoryUrl>https://github.com/andtechstudios/codecast</RepositoryUrl>
+		<Copyright>"© $(CompanyName) $([System.DateTime]::Now.ToString(`yyyy`))"</Copyright>
+
+		<TargetFramework>net6.0</TargetFramework>
+		<PackageId>Andtech.Codecast.Console</PackageId>
+		<RootNamespace>$(PackageId)</RootNamespace>
+	</PropertyGroup>
+
+	<!-- dotnet-tool -->
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<ToolCommandName>codecast</ToolCommandName>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackAsTool>true</PackAsTool>
+	</PropertyGroup>
+
+	<!-- NuGet Packages -->
+	<ItemGroup>
+		<PackageReference Include="Andtech.Common" Version="0.11.0" />
+		<PackageReference Include="CommandLineParser" Version="2.8.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Andtech.Codecast\Andtech.Codecast.csproj" />
+	</ItemGroup>
+</Project>

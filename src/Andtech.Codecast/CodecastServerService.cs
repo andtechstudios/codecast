@@ -1,5 +1,6 @@
 ﻿using Andtech.Common;
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace Andtech.Codecast
 	public class CodecastServerService
 	{
 		public int RetryDelay { get; set; } = 500;
+		public bool UseLoopback { get; set; } = false;
 
 		public async Task RunAsync()
 		{
@@ -20,7 +22,8 @@ namespace Andtech.Codecast
 
 				try
 				{
-					await server.RunAsync();
+					var localEndpoint = UseLoopback ? new IPEndPoint(IPAddress.Loopback, 8080) : GetHostIPEndpoint(8080);
+					await server.RunAsync(localEndpoint);
 				}
 				catch (SocketException socketEx)
 				{
@@ -35,6 +38,13 @@ namespace Andtech.Codecast
 				Thread.Sleep(RetryDelay);
 				Log.WriteLine("Retrying...", Verbosity.silly);
 			}
+		}
+
+		public IPEndPoint GetHostIPEndpoint(int port)
+		{
+			IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+			IPAddress ipAddress = ipHostInfo.AddressList[0];
+			return new IPEndPoint(ipAddress, port);
 		}
 
 		void Server_DataReceived(string data)
