@@ -1,4 +1,8 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Andtech.Codecast
 {
@@ -13,6 +17,25 @@ namespace Andtech.Codecast
 				return false;
 			else
 				return true;
+		}
+
+		public static async Task ConnectAsync(this Socket socket, IPEndPoint remoteEndpoint, CancellationToken cancellationToken)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+
+			using (cancellationToken.Register(() => socket.Close()))
+			{
+				try
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+
+					await socket.ConnectAsync(remoteEndpoint).ConfigureAwait(false);
+				}
+				catch (NullReferenceException) when (cancellationToken.IsCancellationRequested)
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+				}
+			}
 		}
 	}
 }

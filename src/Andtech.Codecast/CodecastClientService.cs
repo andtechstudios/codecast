@@ -8,22 +8,27 @@ using System.Threading.Tasks;
 namespace Andtech.Codecast
 {
 
-	public class CodecastServerService
+	public class CodecastClientService
 	{
 		public int RetryDelay { get; set; } = 500;
-		public bool UseLoopback { get; set; } = false;
+		public bool Loopback { get; set; } = false;
 
-		public async Task RunAsync()
+		public async Task RunAsync(string address, int port)
 		{
+			var client = new CodecastClient();
+			client.DataReceived += Server_DataReceived;
+
+			var ipAddress = IPAddress.Parse(address);
+			var endpoint = new IPEndPoint(ipAddress, port);
+
+			Log.WriteLine($"Attempting connection to {endpoint}...", Verbosity.silly);
 			while (true)
 			{
-				var server = new CodecastServer();
-				server.DataReceived += Server_DataReceived;
-
 				try
 				{
-					var localEndpoint = UseLoopback ? new IPEndPoint(IPAddress.Loopback, 8080) : GetHostIPEndpoint(8080);
-					await server.RunAsync(localEndpoint);
+					await client.ConnectAsync(endpoint);
+					Log.WriteLine($"Connection established...", ConsoleColor.Green, Verbosity.verbose);
+					await client.RunAsync(cancellationToken: default);
 				}
 				catch (SocketException socketEx)
 				{
