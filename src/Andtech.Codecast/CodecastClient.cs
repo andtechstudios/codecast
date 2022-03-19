@@ -13,27 +13,38 @@ namespace Andtech.Codecast
 	{
 		private Socket socket;
 
-		public async Task ConnectAsync(int port = 8080, CancellationToken cancellationToken = default)
+		public void Connect(int port = 8080, CancellationToken cancellationToken = default)
 		{
 			IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
 			IPAddress ipAddress = ipHostInfo.AddressList[0];
 
-			await ConnectAsync(ipAddress, port, cancellationToken);
+			Connect(ipAddress, port, cancellationToken);
 		}
 
-		public async Task ConnectAsync(IPAddress ipAddress, int port = 8080, CancellationToken cancellationToken = default)
+		public void Connect(IPAddress ipAddress, int port = 8080, CancellationToken cancellationToken = default)
 		{
 			IPEndPoint endpoint = new IPEndPoint(ipAddress, port);
 
-			await ConnectAsync(endpoint, cancellationToken);
+			Connect(endpoint, cancellationToken);
 		}
 
-		public async Task ConnectAsync(IPEndPoint remoteEP, CancellationToken cancellationToken = default)
+		public void Connect(IPEndPoint remoteEP, CancellationToken cancellationToken = default)
 		{
 			socket = new Socket(remoteEP.Address.AddressFamily,
 				SocketType.Stream, ProtocolType.Tcp);
 
-			await socket.ConnectAsync(remoteEP, cancellationToken: cancellationToken);
+			IAsyncResult result = socket.BeginConnect(remoteEP, null, null);
+			result.AsyncWaitHandle.WaitOne(1000, true);
+
+			if (socket.Connected)
+			{
+				socket.EndConnect(result);
+			}
+			else
+			{
+				socket.Close();
+				throw new SocketException(10060); // Connection timed out.
+			}
 		}
 
 		public async Task RunAsync(CancellationToken cancellationToken)
@@ -41,7 +52,14 @@ namespace Andtech.Codecast
 			var pingTask = PingAsync(socket, cancellationToken: cancellationToken);
 			var listenTask = ListenAsync(socket, cancellationToken: cancellationToken);
 
-			await Task.WhenAll(pingTask, listenTask);
+			try
+			{
+				await Task.WhenAny(pingTask, listenTask);
+			}
+			catch (Exception ex)
+			{
+				Log.WriteLine(ex.Message);
+			}
 		}
 
 		async Task ListenAsync(Socket socket, CancellationToken cancellationToken)
@@ -61,7 +79,17 @@ namespace Andtech.Codecast
 					var chunk = Encoding.ASCII.GetString(buffer, 0, bytesRec);
 					candidate = candidate + chunk;
 
-					Log.WriteLine(chunk, ConsoleColor.DarkRed, Verbosity.diagnostic);
+					if (Log.Verbosity <= Verbosity.diagnostic)
+					{
+						if (!string.IsNullOrEmpty(chunk))
+						{
+							Log.WriteLine(chunk, ConsoleColor.DarkBlue, Verbosity.diagnostic);
+						}
+					}
+					else
+					{
+						Log.WriteLine(chunk, ConsoleColor.DarkBlue, Verbosity.silly);
+					}
 
 					if (chunk.EndsWith("<EOF>"))
 					{
@@ -83,6 +111,8 @@ namespace Andtech.Codecast
 			while (true)
 			{
 				cancellationToken.ThrowIfCancellationRequested();
+
+				Log.WriteLine("ping", ConsoleColor.Gray, Verbosity.diagnostic);
 
 				if (!localSocket.IsConnected())
 				{

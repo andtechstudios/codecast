@@ -79,7 +79,7 @@ namespace Andtech.Codecast.Console
 		[Option("loopback", HelpText = "Use loopback.")]
 		public bool UseLoopback { get; set; }
 
-		[Option("unity-mode", HelpText = "Receive Unity formatted messages")]
+		[Option("unity", HelpText = "Process messages in Unity format.")]
 		public bool UnityMode { get; set; }
 	}
 

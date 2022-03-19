@@ -10,23 +10,22 @@ namespace Andtech.Codecast
 
 	public class CodecastClientService
 	{
-		public int RetryDelay { get; set; } = 500;
 		public bool Loopback { get; set; } = false;
 
 		public async Task RunAsync(string address, int port)
 		{
-			var client = new CodecastClient();
-			client.DataReceived += Server_DataReceived;
-
 			var ipAddress = IPAddress.Parse(address);
 			var endpoint = new IPEndPoint(ipAddress, port);
 
 			Log.WriteLine($"Attempting connection to {endpoint}...", Verbosity.silly);
 			while (true)
 			{
+				var client = new CodecastClient();
+				client.DataReceived += Server_DataReceived;
+
 				try
 				{
-					await client.ConnectAsync(endpoint);
+					client.Connect(endpoint);
 					Log.WriteLine($"Connection established...", ConsoleColor.Green, Verbosity.verbose);
 					await client.RunAsync(cancellationToken: default);
 				}
@@ -39,8 +38,6 @@ namespace Andtech.Codecast
 					Log.Error.WriteLine(ex, ConsoleColor.Red);
 				}
 
-				Log.WriteLine($"Will retry in {RetryDelay}ms...", Verbosity.silly);
-				Thread.Sleep(RetryDelay);
 				Log.WriteLine("Retrying...", Verbosity.silly);
 			}
 		}
