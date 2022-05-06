@@ -1,126 +1,72 @@
 ﻿using Andtech.Common;
 using System;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
+using WatsonTcp;
 
 namespace Andtech.Codecast
 {
 
 	public class CodecastClient
 	{
-		private Socket socket;
+		public bool Connected => client.Connected;
 
-		public void Connect(int port = 8080, CancellationToken cancellationToken = default)
+		private readonly WatsonTcpClient client;
+		private readonly AutoResetEvent autoEvent = new AutoResetEvent(false);
+
+		public CodecastClient(IPEndPoint endpoint)
 		{
-			IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-			IPAddress ipAddress = ipHostInfo.AddressList[0];
-
-			Connect(ipAddress, port, cancellationToken);
+			client = new WatsonTcpClient(endpoint.Address.ToString(), endpoint.Port);
+			client.Events.ServerConnected += ServerConnected;
+			client.Events.ServerDisconnected += ServerDisconnected;
+			client.Events.MessageReceived += MessageReceived;
+			client.Callbacks.SyncRequestReceived = SyncRequestReceived;
 		}
 
-		public void Connect(IPAddress ipAddress, int port = 8080, CancellationToken cancellationToken = default)
+		public void Connect()
 		{
-			IPEndPoint endpoint = new IPEndPoint(ipAddress, port);
-
-			Connect(endpoint, cancellationToken);
+			client.Connect();
 		}
 
-		public void Connect(IPEndPoint remoteEP, CancellationToken cancellationToken = default)
+		public void Wait()
 		{
-			socket = new Socket(remoteEP.Address.AddressFamily,
-				SocketType.Stream, ProtocolType.Tcp);
-
-			IAsyncResult result = socket.BeginConnect(remoteEP, null, null);
-			result.AsyncWaitHandle.WaitOne(1000, true);
-
-			if (socket.Connected)
-			{
-				socket.EndConnect(result);
-			}
-			else
-			{
-				socket.Close();
-				throw new SocketException(10060); // Connection timed out.
-			}
+			autoEvent.WaitOne();
 		}
 
-		public async Task RunAsync(CancellationToken cancellationToken)
+		void MessageReceived(object sender, MessageReceivedEventArgs args)
 		{
-			var pingTask = PingAsync(socket, cancellationToken: cancellationToken);
-			var listenTask = ListenAsync(socket, cancellationToken: cancellationToken);
-
-			try
-			{
-				await Task.WhenAny(pingTask, listenTask);
-			}
-			catch (Exception ex)
-			{
-				Log.WriteLine(ex.Message);
-			}
+			var message = Encoding.UTF8.GetString(args.Data);
+			Log.WriteLine("Message from " + args.IpPort + ": " + message, Verbosity.silly);
+			DataReceived?.Invoke(message);
 		}
 
-		async Task ListenAsync(Socket socket, CancellationToken cancellationToken)
+		void ServerConnected(object sender, ConnectionEventArgs args)
 		{
-			byte[] buffer = new byte[1024];
-			var arraySegment = new ArraySegment<byte>(buffer);
-
-			while (true)
-			{
-				string candidate = null;
-
-				while (true)
-				{
-					cancellationToken.ThrowIfCancellationRequested();
-
-					int bytesRec = await socket.ReceiveAsync(arraySegment, SocketFlags.None);
-					var chunk = Encoding.ASCII.GetString(buffer, 0, bytesRec);
-					candidate = candidate + chunk;
-
-					if (Log.Verbosity <= Verbosity.diagnostic)
-					{
-						if (!string.IsNullOrEmpty(chunk))
-						{
-							Log.WriteLine(chunk, ConsoleColor.DarkBlue, Verbosity.diagnostic);
-						}
-					}
-					else
-					{
-						Log.WriteLine(chunk, ConsoleColor.DarkBlue, Verbosity.silly);
-					}
-
-					if (chunk.EndsWith("<EOF>"))
-					{
-						break;
-					}
-				}
-
-				var data = candidate.Clone() as string;
-
-				foreach (var token in data.Split("<EOF>", StringSplitOptions.RemoveEmptyEntries))
-				{
-					DataReceived?.Invoke(token);
-				}
-			}
+			Log.WriteLine("Server " + args.IpPort + " connected", Verbosity.diagnostic);
 		}
 
-		async Task PingAsync(Socket localSocket, CancellationToken cancellationToken)
+		void ServerDisconnected(object sender, DisconnectionEventArgs args)
 		{
-			while (true)
+			Log.WriteLine("Server " + args.IpPort + " disconnected", Verbosity.diagnostic);
+			autoEvent.Set();
+		}
+
+		SyncResponse SyncRequestReceived(SyncRequest req)
+		{
+			switch (Encoding.UTF8.GetString(req.Data))
 			{
-				cancellationToken.ThrowIfCancellationRequested();
-
-				Log.WriteLine("ping", ConsoleColor.Gray, Verbosity.diagnostic);
-
-				if (!localSocket.IsConnected())
-				{
-					throw new InvalidOperationException("The client seems to have disconnected");
-				}
-
-				await Task.Delay(100, cancellationToken: cancellationToken);
+				case "GET_BUFFER_INFO":
+					var info = new BufferInfo(Console.BufferWidth, Console.BufferWidth);
+					var json = JsonSerializer.Serialize(info);
+					return new SyncResponse(req, json);
+				case "CLEAR":
+					Console.Clear();
+					return new SyncResponse(req, "OK");
 			}
+
+			return new SyncResponse(req, "Unknown request");
 		}
 
 		public event Action<string> DataReceived;

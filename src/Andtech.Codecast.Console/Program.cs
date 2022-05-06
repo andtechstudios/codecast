@@ -1,116 +1,50 @@
 ﻿using Andtech.Common;
 using CommandLine;
-using Pastel;
-using System;
-using System.Drawing;
-using System.Text.Json;
-using System.Threading.Tasks;
+using System.Net;
+using System.Threading;
 
 namespace Andtech.Codecast.Console
 {
 
-	public enum LogType
-	{
-		Error,
-		Assert,
-		Warning,
-		Log,
-		Exception,
-	}
-
-	public class UnityLogEntry
-	{
-		public LogType LogType => Enum.Parse<LogType>(logType);
-		public DateTime Timestamp => DateTime.Parse(timestamp);
-
-		public string logType { get; set; }
-		public string message { get; set; }
-		public string timestamp { get; set; }
-	}
-
-	internal class UnityLogger
-	{
-		public bool UseTimestamp { get; set; } = false;
-
-		public void PrintData(string data)
-		{
-			var entry = JsonSerializer.Deserialize<UnityLogEntry>(data);
-
-			var message = entry.message;
-			if (UseTimestamp)
-			{
-				message = entry.Timestamp.ToLocalTime().ToString("[HH:mm:ss] ") + message;
-			}
-
-			switch (entry.LogType)
-			{
-				case LogType.Log:
-					Log.WriteLine(message);
-					break;
-				case LogType.Warning:
-					Log.WriteLine(message, ConsoleColor.Yellow);
-					break;
-				case LogType.Error:
-				case LogType.Exception:
-					Log.WriteLine(message, ConsoleColor.Red);
-					break;
-			}
-		}
-	}
-
-	internal class ExampleLogger
-	{
-
-		public void PrintData(string data)
-		{
-			System.Console.WriteLine("Received: " + data);
-		}
-	}
-
-	internal class Options
-	{
-		[Option("verbosity", HelpText = "Logging verbosity.")]
-		public Verbosity Verbosity { get; set; }
-		[Value(0, MetaName = "address", Default = "localhost", Required = false)]
-		public string Address { get; set; }
-		[Value(1, MetaName = "port", Default = 8080, Required = false)]
-		public int Port { get; set; }
-
-		[Option("loopback", HelpText = "Use loopback.")]
-		public bool UseLoopback { get; set; }
-
-		[Option("unity", HelpText = "Process messages in Unity format.")]
-		public bool UnityMode { get; set; }
-	}
-
 	internal class Program
 	{
 
-		public static async Task Main(string[] args)
+		public static void Main(string[] args)
 		{
 			var parser = Parser.Default.ParseArguments<Options>(args);
-			await parser.WithParsedAsync(OnParse);
+			parser.WithParsed(OnParse);
 		}
 
-		static async Task OnParse(Options options)
+		static void OnParse(Options options)
 		{
 			Log.Verbosity = options.Verbosity;
 
-			var service = new CodecastClientService()
-			{
-				Loopback = options.UseLoopback,
-			};
+			var endpoint = IPEndPoint.Parse(options.Host);
+
+			var client = new CodecastClient(endpoint);
 
 			if (options.UnityMode)
 			{
-				service.DataReceived += new UnityLogger().PrintData;
+				client.DataReceived += new UnityLogger().PrintData;
 			}
 			else
 			{
-				service.DataReceived += new ExampleLogger().PrintData;
+				client.DataReceived += new ExampleLogger().PrintData;
 			}
 
-			await service.RunAsync(options.Address, options.Port);
+			client.Connect();
+			client.Wait();
+		}
+
+		internal class Options
+		{
+			[Option("verbosity", HelpText = "Logging verbosity.")]
+			public Verbosity Verbosity { get; set; }
+			[Value(0, MetaName = "host", Default = "127.0.0.1:8080", Required = false)]
+			public string Host { get; set; }
+
+			[Option("unity", HelpText = "Process messages in Unity format.")]
+			public bool UnityMode { get; set; }
 		}
 	}
 

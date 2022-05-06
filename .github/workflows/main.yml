@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
+  deploy-nuget:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -24,3 +24,18 @@ jobs:
           dotnet pack --configuration Release "${{env.NUGET_PROJECT_DIR}}" --no-build --output . /p:Version="$version"
       - run: |
           dotnet nuget push *.nupkg --source "${{env.NUGET_SOURCE_URL}}" --api-key "${{env.NUGET_API_KEY}}" --skip-duplicate
+  deploy-upm:
+    runs-on: ubuntu-latest    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: master
+    - run: |
+        cd unity/Assets/Codecast
+        npm version ${{github.ref_name}} --allow-same-version
+    - uses: s0/git-publish-subdir-action@develop
+      env:
+        REPO: self
+        BRANCH: upm
+        FOLDER: unity/Assets/Codecast
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
