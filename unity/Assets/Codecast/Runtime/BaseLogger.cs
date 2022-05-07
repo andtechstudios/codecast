@@ -14,12 +14,7 @@ namespace Andtech.Codecast
 
 		public void Log(LogType logType, object message)
 		{
-			var data = new UnityLogEntry()
-			{
-				logType = logType.ToString(),
-				message = message.ToString(),
-				timestamp = DateTime.UtcNow.ToString("o"),
-			};
+			var data = new UnityLogEntry(message, logType);
 
 			OnLog(data);
 		}
@@ -46,12 +41,7 @@ namespace Andtech.Codecast
 
 		public void LogFormat(LogType logType, string format, params object[] args)
 		{
-			var data = new UnityLogEntry()
-			{
-				logType = logType.ToString(),
-				message = string.Format(format, args),
-				timestamp = DateTime.UtcNow.ToString("o"),
-			};
+			var data = new UnityLogEntry(string.Format(format, args), logType);
 
 			OnLog(data);
 		}

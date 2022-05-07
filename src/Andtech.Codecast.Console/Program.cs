@@ -1,5 +1,6 @@
 ﻿using Andtech.Common;
 using CommandLine;
+using System;
 using System.Net;
 using System.Threading;
 
@@ -22,7 +23,6 @@ namespace Andtech.Codecast.Console
 			var endpoint = IPEndPoint.Parse(options.Host);
 
 			var client = new CodecastClient(endpoint);
-
 			if (options.UnityMode)
 			{
 				client.DataReceived += new UnityLogger().PrintData;
@@ -32,8 +32,23 @@ namespace Andtech.Codecast.Console
 				client.DataReceived += new ExampleLogger().PrintData;
 			}
 
-			client.Connect();
-			client.Wait();
+			while (true)
+			{
+				try
+				{
+					Log.Error.WriteLine($"Connecting to {endpoint}...", Verbosity.verbose);
+					client.Connect();
+					Log.Error.WriteLine("Connected!", ConsoleColor.Green, Verbosity.verbose);
+					client.Wait();
+					Log.WriteLine("Connection closed!", Verbosity.verbose);
+				}
+				catch (Exception ex)
+				{
+					Log.Error.WriteLine(ex, ConsoleColor.Red, Verbosity.diagnostic);
+				}
+
+				Thread.Sleep(250);
+			}
 		}
 
 		internal class Options

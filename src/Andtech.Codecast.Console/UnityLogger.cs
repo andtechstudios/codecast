@@ -12,7 +12,7 @@ namespace Andtech.Codecast.Console
 		{
 			var entry = JsonSerializer.Deserialize<UnityLogEntry>(data);
 
-			var message = entry.message;
+			var message = TextUtility.ParseColor(entry.message);
 			if (UseTimestamp)
 			{
 				message = entry.Timestamp.ToLocalTime().ToString("[HH:mm:ss] ") + message;

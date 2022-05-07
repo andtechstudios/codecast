@@ -1,13 +1,17 @@
-﻿namespace Andtech.Codecast.Console
+﻿using Pastel;
+using System.Drawing;
+using System.Text.RegularExpressions;
+
+namespace Andtech.Codecast.Console
 {
 	internal class ExampleLogger
 	{
 
 		public void PrintData(string data)
 		{
-			System.Console.WriteLine("Received: " + data);
+			data = TextUtility.ParseColor(data);
+			System.Console.WriteLine(data);
 		}
 	}
-
 }
 

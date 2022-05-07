@@ -28,6 +28,7 @@ namespace Andtech.Codecast
 		public void Connect()
 		{
 			client.Connect();
+			autoEvent.Reset();
 		}
 
 		public void Wait()
