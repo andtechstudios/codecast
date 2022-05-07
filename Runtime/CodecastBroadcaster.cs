@@ -2,21 +2,22 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using UnityEngine;
 using WatsonTcp;
 
 namespace Andtech.Codecast
 {
 
-	public class BufferInfo
-	{
-		public int width;
-		public int height;
-	}
-
 	public class CodecastBroadcaster
 	{
+		public bool Connected => !string.IsNullOrEmpty(clientIpPort);
+		public BufferInfo BufferInfo => clientBufferInfo;
+
 		private readonly WatsonTcpServer server;
+		private BufferInfo clientBufferInfo;
+		private string clientIpPort;
+		private bool hasWarned;
 
 		public CodecastBroadcaster(IPEndPoint endpoint)
 		{
@@ -26,82 +27,106 @@ namespace Andtech.Codecast
 			server.Events.MessageReceived += Events_MessageReceived;
 		}
 
-		private void Events_MessageReceived(object sender, MessageReceivedEventArgs e)
-		{
-			throw new NotSupportedException();
-		}
-
 		public void Start()
 		{
-			server.Start();
+			if (!Connected)
+			{
+				server.Start();
+			}
 		}
 
 		public void Stop()
 		{
-			server.DisconnectClients();
+			if (Connected)
+			{
+				server.DisconnectClients();
+			}
+
 			server.Stop();
+			clientIpPort = null;
+			clientBufferInfo = null;
 		}
 
 		public void Send(string data)
 		{
-			foreach (var client in server.ListClients())
+			if (!CheckConnection())
 			{
-				server.Send(client, data);
+				return;
 			}
+
+			server.Send(clientIpPort, data);
 		}
 
-		public BufferInfo GetClientBufferInfo()
+		public void Clear()
 		{
-			var client = server.ListClients().First();
+			if (!CheckConnection())
+			{
+				return;
+			}
+
 			try
 			{
-				var response = server.SendAndWait(5000, client, "GET_BUFFER_INFO");
-				var info = JsonUtility.FromJson<BufferInfo>(Encoding.UTF8.GetString(response.Data));
-
-				return info;
+				var response = server.SendAndWait(5000, clientIpPort, "CLEAR");
 			}
 			catch (TimeoutException ex)
 			{
 				Debug.LogError(ex);
 			}
-
-			return new BufferInfo()
-			{
-				width = -1,
-				height = -1,
-			};
 		}
 
-		public void Clear()
+		public BufferInfo GetClientBufferInfo()
 		{
-			foreach (var client in server.ListClients())
+			try
 			{
-				try
-				{
-					var response = server.SendAndWait(5000, client, "CLEAR");
-				}
-				catch (TimeoutException ex)
-				{
-					Debug.LogError(ex);
-				}
+				var response = server.SendAndWait(5000, clientIpPort, "GET_BUFFER_INFO");
+				return JsonUtility.FromJson<BufferInfo>(Encoding.UTF8.GetString(response.Data));
 			}
+			catch (TimeoutException ex)
+			{
+				Debug.LogError(ex);
+				return null;
+			}
+		}
+
+		private void Events_MessageReceived(object sender, MessageReceivedEventArgs e)
+		{
+			throw new NotSupportedException();
 		}
 
 		void Server_ClientConnected(object sender, ConnectionEventArgs args)
 		{
 			Debug.Log("Client connected: " + args.IpPort);
+
+			clientIpPort = args.IpPort;
+			clientBufferInfo = GetClientBufferInfo();
+
 			ClientConnected?.Invoke(this, args);
 		}
 
 		void Server_ClientDisconnected(object sender, DisconnectionEventArgs args)
 		{
 			Debug.Log("Client disconnected: " + args.IpPort + ": " + args.Reason.ToString());
+
+			clientIpPort = null;
+			clientBufferInfo = null;
+
 			ClientDisconnected?.Invoke(this, args);
 		}
 
-		void MessageReceived(object sender, MessageReceivedEventArgs args)
+		bool CheckConnection()
 		{
-			Debug.Log("Message from " + args.IpPort + ": " + Encoding.UTF8.GetString(args.Data));
+			if (!Connected)
+			{
+				if (!hasWarned)
+				{
+					Debug.LogWarning("No client connected.");
+					hasWarned = true;
+				}
+
+				return false;
+			}
+
+			return true;
 		}
 
 		public event EventHandler<ConnectionEventArgs> ClientConnected;
