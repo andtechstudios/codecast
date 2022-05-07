@@ -1,0 +1,11 @@
+{
+	"name": "com.andtech.codecast",
+	"displayName": "Codecast",
+	"description": "",
+	"author": {
+		"name": "Andtech Studios",
+		"email": "andtechstudios@gmail.com",
+		"url": "https://github.com/andtechstudios"
+	},
+	"version": "0.4.0"
+}

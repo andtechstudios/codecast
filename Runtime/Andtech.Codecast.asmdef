@@ -1,0 +1,16 @@
+{
+    "name": "Andtech.Codecast",
+    "rootNamespace": "Andtech.Codecast",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "WatsonTcp.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
