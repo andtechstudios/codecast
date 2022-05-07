@@ -10,7 +10,22 @@ namespace Andtech.Codecast.Console
 
 		public void PrintData(string data)
 		{
-			var entry = JsonSerializer.Deserialize<UnityLogEntry>(data);
+			UnityLogEntry entry = default;
+			try
+			{
+				entry = JsonSerializer.Deserialize<UnityLogEntry>(data);
+			}
+			catch
+			{
+				if (Log.Verbosity >= Verbosity.verbose)
+				{
+					Log.Error.WriteLine("Malformed JSON: " + data);
+				}
+				else
+				{
+					Log.Error.WriteLine("Malformed JSON!");
+				}
+			}
 
 			var message = TextUtility.ParseColor(entry.message);
 			if (UseTimestamp)

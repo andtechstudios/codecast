@@ -10,7 +10,7 @@ namespace Andtech.Codecast.Console
 		public void PrintData(string data)
 		{
 			data = TextUtility.ParseColor(data);
-			System.Console.WriteLine(data);
+			System.Console.Write(data);
 		}
 	}
 }

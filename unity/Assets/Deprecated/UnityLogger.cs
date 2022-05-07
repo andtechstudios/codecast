@@ -6,6 +6,7 @@ namespace Andtech.Codecast
 	public class UnityLogger : BaseLogger
 	{
 		public CodecastBroadcaster Broadcaster => broadcaster;
+		public bool Enabled { get; set; }
 
 		private readonly CodecastBroadcaster broadcaster;
 		private bool isActive;
@@ -17,17 +18,13 @@ namespace Andtech.Codecast
 
 		~UnityLogger()
 		{
-			if (isActive)
-			{
-				Stop();
-			}
+			Stop();
 		}
 
 		public void Start()
 		{
 			if (isActive)
 			{
-				Debug.LogWarning("The logger is already active.");
 				return;
 			}
 
@@ -40,7 +37,6 @@ namespace Andtech.Codecast
 		{
 			if (!isActive)
 			{
-				Debug.LogWarning("The logger is not active.");
 				return;
 			}
 
@@ -51,14 +47,12 @@ namespace Andtech.Codecast
 
 		private void Application_logMessageReceived(string message, string stackTrace, LogType logType)
 		{
-			if (!isActive)
+			if (!Enabled)
 			{
-				Debug.LogWarning("The logger is not active.");
 				return;
 			}
 
 			var data = new UnityLogEntry(message, logType);
-
 			broadcaster.Send(JsonUtility.ToJson(data));
 		}
 	}
