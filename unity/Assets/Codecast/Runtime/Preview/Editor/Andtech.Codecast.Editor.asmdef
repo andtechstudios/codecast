@@ -1,0 +1,18 @@
+{
+    "name": "Andtech.Codecast.Editor",
+    "rootNamespace": "Andtech.Codecast.Editor",
+    "references": [
+        "GUID:223c2a56368c80641a0c95e91128426f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
