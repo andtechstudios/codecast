@@ -18,7 +18,7 @@ Historically, the Unity Editor console did not use a monospace font (until [2021
 1. Open the Package Manager window in the Unity Editor.
 2. Click "Add package from git URL..."
 3. Enter the HTTPS URL of this repo.
-	Ex: `https://github.com/andtechstudios/codecase.git`
+	Ex: `https://github.com/andtechstudios/codecast.git`
 
 # See Also
 * [jchristn/WatsonTcp](https://github.com/jchristn/WatsonTcp)
