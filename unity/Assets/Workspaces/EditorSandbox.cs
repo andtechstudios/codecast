@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EditorSandbox : MonoBehaviour
 {
+#if UNITY_EDITOR
 	[TextArea(3, 999)]
 	public string message;
 
@@ -42,4 +43,5 @@ public class EditorSandbox : MonoBehaviour
 	{
 		Debug.Log("Hello world");
 	}
+#endif
 }
