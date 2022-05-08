@@ -13,5 +13,12 @@ Historically, the Unity Editor console did not use a monospace font (until [2021
 * Complete font features (ANSI coloring, monospace, ligatures)
 * Scroll buffering
 
+# Setup
+## Installation
+1. Open the Package Manager window in the Unity Editor.
+2. Click "Add package from git URL..."
+3. Enter the HTTPS URL of this repo.
+	Ex: `https://github.com/andtechstudios/codecase.git`
+
 # See Also
 * [jchristn/WatsonTcp](https://github.com/jchristn/WatsonTcp)
