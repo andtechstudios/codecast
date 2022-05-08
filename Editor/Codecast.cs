@@ -3,9 +3,7 @@ using UnityEngine;
 namespace Andtech.Codecast
 {
 
-#if UNITY_EDITOR
 	[UnityEditor.InitializeOnLoad]
-#endif
 	public static partial class Codecast
 	{
 		public static bool SendUnityLogs { get; set; }
@@ -20,25 +18,8 @@ namespace Andtech.Codecast
 		static Codecast()
 		{
 			Application.logMessageReceived += Application_logMessageReceived;
-
-#if UNITY_EDITOR
 			UnityEditor.EditorApplication.playModeStateChanged += EditorApplication_playModeStateChanged;
 			Initialize();
-#endif
-		}
-
-		static void Initialize()
-		{
-			var ipAddress = UnityEditor.EditorPrefs.GetString("ipAddress", "127.0.0.1");
-			var port = UnityEditor.EditorPrefs.GetInt("port", 8080);
-			var autoStart = UnityEditor.EditorPrefs.GetBool("autoStart", false);
-			SendUnityLogs = UnityEditor.EditorPrefs.GetBool("sendUnityLogs", false);
-			RawUnityLogs = UnityEditor.EditorPrefs.GetBool("rawUnityLogs", false);
-
-			if (autoStart)
-			{
-				Start(ipAddress, port);
-			}
 		}
 
 		public static void Start(string ipAddress, int port = 8080)
@@ -59,7 +40,6 @@ namespace Andtech.Codecast
 
 		public static void Write(object message)
 		{
-#if UNITY_EDITOR
 			if (IsRunning)
 			{
 				if (broadcaster.IsConnected)
@@ -76,20 +56,28 @@ namespace Andtech.Codecast
 					hasShownWarning = true;
 				}
 			}
-#else
-#endif
 		}
 
 		public static void WriteLine(object message)
 		{
-#if UNITY_EDITOR
 			Write(message + "\n");
-#else
-#endif
 		}
 
-#if UNITY_EDITOR
-		private static void EditorApplication_playModeStateChanged(UnityEditor.PlayModeStateChange obj)
+		static void Initialize()
+		{
+			var ipAddress = UnityEditor.EditorPrefs.GetString("ipAddress", "127.0.0.1");
+			var port = UnityEditor.EditorPrefs.GetInt("port", 8080);
+			var autoStart = UnityEditor.EditorPrefs.GetBool("autoStart", false);
+			SendUnityLogs = UnityEditor.EditorPrefs.GetBool("sendUnityLogs", false);
+			RawUnityLogs = UnityEditor.EditorPrefs.GetBool("rawUnityLogs", false);
+
+			if (autoStart)
+			{
+				Start(ipAddress, port);
+			}
+		}
+
+		static void EditorApplication_playModeStateChanged(UnityEditor.PlayModeStateChange obj)
 		{
 			switch (obj)
 			{
@@ -98,11 +86,9 @@ namespace Andtech.Codecast
 					break;
 			}
 		}
-#endif
 
-		private static void Application_logMessageReceived(string message, string stackTrace, LogType logType)
+		static void Application_logMessageReceived(string message, string stackTrace, LogType logType)
 		{
-#if UNITY_EDITOR
 			if (!SendUnityLogs)
 			{
 				return;
@@ -120,7 +106,6 @@ namespace Andtech.Codecast
 			}
 
 			Write(data);
-#endif
 		}
 	}
 }

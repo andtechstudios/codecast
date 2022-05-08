@@ -1,16 +1,16 @@
 {
     "name": "Andtech.Codecast.Editor",
     "rootNamespace": "Andtech.Codecast.Editor",
-    "references": [
-        "GUID:223c2a56368c80641a0c95e91128426f"
-    ],
+    "references": [],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
-    "precompiledReferences": [],
+    "precompiledReferences": [
+        "WatsonTcp.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
