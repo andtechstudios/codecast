@@ -68,7 +68,7 @@ namespace Andtech.Codecast.Editor
             Codecast.SendUnityLogs = sendUnityLogs;
             Codecast.RawUnityLogs = rawUnityLogs;
 
-            if (!Codecast.IsActive && autoStart)
+            if (!Codecast.IsRunning && autoStart)
             {
                 Codecast.Start(ipAddress, port);
             }
@@ -81,7 +81,7 @@ namespace Andtech.Codecast.Editor
                 }
             }
 
-            if (Codecast.IsActive)
+            if (Codecast.IsRunning)
             {
                 EditorGUILayout.HelpBox($"Codecast Server running at {ipAddress}:{port}", MessageType.Info);
             }

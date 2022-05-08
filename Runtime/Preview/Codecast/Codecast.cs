@@ -10,10 +10,11 @@ namespace Andtech.Codecast
 	{
 		public static bool SendUnityLogs { get; set; }
 		public static bool RawUnityLogs { get; set; }
-		public static bool IsActive => broadcaster?.IsActive ?? false;
-		public static bool IsConnected => broadcaster?.Connected ?? false;
+		public static bool IsRunning => broadcaster?.IsRunning ?? false;
+		public static bool IsConnected => broadcaster?.IsConnected ?? false;
 		public static BufferInfo ClientBufferInfo => broadcaster?.BufferInfo ?? default;
 
+		private static bool hasShownWarning;
 		private static CodecastBroadcaster broadcaster;
 
 		static Codecast()
@@ -21,6 +22,7 @@ namespace Andtech.Codecast
 			Application.logMessageReceived += Application_logMessageReceived;
 
 #if UNITY_EDITOR
+			UnityEditor.EditorApplication.playModeStateChanged += EditorApplication_playModeStateChanged;
 			Initialize();
 #endif
 		}
@@ -58,13 +60,21 @@ namespace Andtech.Codecast
 		public static void Write(object message)
 		{
 #if UNITY_EDITOR
-			if (IsActive)
+			if (IsRunning)
 			{
-				broadcaster.Send(message.ToString());
+				if (broadcaster.IsConnected)
+				{
+					broadcaster.Send(message.ToString());
+				}
 			}
 			else
 			{
-				Debug.LogWarning("Codecast server not active");
+				if (!hasShownWarning)
+				{
+					Debug.LogWarning("Codecast server not running");
+
+					hasShownWarning = true;
+				}
 			}
 #else
 #endif
@@ -73,17 +83,22 @@ namespace Andtech.Codecast
 		public static void WriteLine(object message)
 		{
 #if UNITY_EDITOR
-			if (IsActive)
-			{
-				broadcaster.Send(message.ToString() + "\n");
-			}
-			else
-			{
-				Debug.LogWarning("Codecast server not active");
-			}
+			Write(message + "\n");
 #else
 #endif
 		}
+
+#if UNITY_EDITOR
+		private static void EditorApplication_playModeStateChanged(UnityEditor.PlayModeStateChange obj)
+		{
+			switch (obj)
+			{
+				case UnityEditor.PlayModeStateChange.EnteredPlayMode:
+					hasShownWarning = false;
+					break;
+			}
+		}
+#endif
 
 		private static void Application_logMessageReceived(string message, string stackTrace, LogType logType)
 		{
