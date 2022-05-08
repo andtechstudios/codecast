@@ -11,16 +11,15 @@ namespace Andtech.Codecast
 
 	public class CodecastBroadcaster
 	{
-		public bool IsActive => isStarted;
-		public bool Connected => !string.IsNullOrEmpty(clientIpPort);
+		public bool IsRunning => isRunning;
+		public bool IsConnected => !string.IsNullOrEmpty(clientIpPort);
 		public bool SendUnityLogs { get; set; }
 		public BufferInfo BufferInfo => clientBufferInfo;
 
 		private readonly WatsonTcpServer server;
 		private BufferInfo clientBufferInfo;
 		private string clientIpPort;
-		private bool hasWarned;
-		private bool isStarted;
+		private bool isRunning;
 
 		public CodecastBroadcaster(string ipAddress = "127.0.0.1", int port = 8080)
 		{
@@ -38,18 +37,23 @@ namespace Andtech.Codecast
 			server.Events.MessageReceived += Events_MessageReceived;
 		}
 
+		~CodecastBroadcaster()
+		{
+			server?.Dispose();
+		}
+
 		public void Start()
 		{
-			if (!Connected)
+			if (!IsConnected)
 			{
 				server.Start();
-				isStarted = true;
+				isRunning = true;
 			}
 		}
 
 		public void Stop()
 		{
-			if (Connected)
+			if (IsConnected)
 			{
 				server.DisconnectClients();
 			}
@@ -57,7 +61,7 @@ namespace Andtech.Codecast
 			server.Stop();
 			clientIpPort = null;
 			clientBufferInfo = null;
-			isStarted = false;
+			isRunning = false;
 		}
 
 		public void Send(string data)
@@ -128,14 +132,8 @@ namespace Andtech.Codecast
 
 		bool CheckConnection()
 		{
-			if (!Connected)
+			if (!IsConnected)
 			{
-				if (!hasWarned)
-				{
-					Debug.LogWarning("No client connected.");
-					hasWarned = true;
-				}
-
 				return false;
 			}
 
