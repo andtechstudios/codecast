@@ -33,9 +33,9 @@ jobs:
     - run: |
         cd unity/Assets/Codecast
         mv "Tests" "~Tests" || true
-        mv "Tests.meta" "~Tests.meta" || true
+        rm "Tests.meta" || true
         mv "Samples" "~Samples" || true
-        mv "Samples.meta" "~Samples.meta" || true
+        rm "Samples.meta" || true
         sed -i 's/\"path\":[[:space:]]*\"Samples\//\"path\": \"~Samples\//' package.json
     - run: |
         cd unity/Assets/Codecast
