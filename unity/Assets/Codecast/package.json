@@ -6,5 +6,12 @@
 		"name": "Andtech Studios",
 		"email": "andtechstudios@gmail.com",
 		"url": "https://github.com/andtechstudios"
-	}
+	},
+	"samples": [
+		{
+			"displayName": "Singleton Wrapper Example",
+			"description": "Access the Codecast server (editor only).",
+			"path": "Samples/Singleton Wrapper Example"
+		}
+	]
 }
