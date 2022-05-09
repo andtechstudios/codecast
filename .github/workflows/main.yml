@@ -32,11 +32,11 @@ jobs:
         ref: master
     - run: |
         cd unity/Assets/Codecast
-        mv "Tests" "~Tests" || true
+        mv "Tests" "Tests~" || true
         rm "Tests.meta" || true
-        mv "Samples" "~Samples" || true
+        mv "Samples" "Samples~" || true
         rm "Samples.meta" || true
-        sed -i 's/\"path\":[[:space:]]*\"Samples\//\"path\": \"~Samples\//' package.json
+        sed -i 's/\"path\":[[:space:]]*\"Samples\//\"path\": \"Samples~\//' package.json
     - run: |
         cd unity/Assets/Codecast
         npm version ${{github.ref_name}} --allow-same-version
