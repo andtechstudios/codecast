@@ -20,12 +20,12 @@ namespace Andtech.Codecast.Console
 		{
 			Log.Verbosity = options.Verbosity;
 
-			var endpoint = IPEndPoint.Parse(options.Host);
+			var endpoint = ParseUtility.IPEndPoint(options.Host);
 
 			var client = new CodecastClient(endpoint);
 			if (options.UnityMode)
 			{
-				client.DataReceived += new UnityLogger().PrintData;
+				client.DataReceived += new UnityLogger() { UseTimestamp = options.Timestamp }.PrintData;
 			}
 			else
 			{
@@ -58,8 +58,10 @@ namespace Andtech.Codecast.Console
 			[Value(0, MetaName = "host", Default = "127.0.0.1:8080", Required = false)]
 			public string Host { get; set; }
 
-			[Option("unity", HelpText = "Process messages in Unity format.")]
+			[Option("unity", HelpText = "Process each message in Unity format.")]
 			public bool UnityMode { get; set; }
+			[Option("timestamp", HelpText = "Show timestamps with each message.")]
+			public bool Timestamp { get; set; }
 		}
 	}
 
