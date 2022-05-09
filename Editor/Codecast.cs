@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using UnityEngine;
 
 namespace Andtech.Codecast.Editor
@@ -73,7 +74,14 @@ namespace Andtech.Codecast.Editor
 
 			if (autoStart)
 			{
-				Start(ipAddress, port);
+				try
+				{
+					Start(ipAddress, port);
+				}
+				catch (SocketException)
+				{
+					UnityEditor.EditorPrefs.SetBool("autoStart", false);
+				}
 			}
 		}
 

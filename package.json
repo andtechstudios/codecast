@@ -7,5 +7,12 @@
 		"email": "andtechstudios@gmail.com",
 		"url": "https://github.com/andtechstudios"
 	},
-	"version": "0.9.0"
+	"samples": [
+		{
+			"displayName": "Singleton Wrapper Example",
+			"description": "Access the Codecast server (editor only).",
+			"path": "~Samples/Singleton Wrapper Example"
+		}
+	],
+	"version": "0.10.0"
 }
