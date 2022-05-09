@@ -1,10 +1,9 @@
-using Andtech.Codecast.Editor;
 using NaughtyAttributes;
 using UnityEngine;
 
-public class EditorSandbox : MonoBehaviour
+public class InteractiveSandbox : MonoBehaviour
 {
-#if UNITY_EDITOR
+
 	[TextArea(3, 999)]
 	public string message;
 
@@ -43,5 +42,4 @@ public class EditorSandbox : MonoBehaviour
 	{
 		Debug.Log("Hello world");
 	}
-#endif
 }
