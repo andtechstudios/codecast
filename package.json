@@ -11,7 +11,7 @@
 		{
 			"displayName": "Singleton Wrapper Example",
 			"description": "Access the Codecast server (editor only).",
-			"path": "~Samples/Singleton Wrapper Example"
+			"path": "Samples~/Singleton Wrapper Example"
 		}
 	],
 	"version": "0.10.0"
