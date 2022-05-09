@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Andtech.Codecast
+namespace Andtech.Codecast.Editor
 {
 
 	[UnityEditor.InitializeOnLoad]

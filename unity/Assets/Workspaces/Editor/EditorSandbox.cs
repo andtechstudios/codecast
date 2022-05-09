@@ -1,4 +1,4 @@
-using Andtech.Codecast;
+using Andtech.Codecast.Editor;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -17,19 +17,19 @@ public class EditorSandbox : MonoBehaviour
 	[Button]
 	public void Send()
 	{
-		Codecast.WriteLine(JsonUtility.ToJson(UnityLogEntry.Log(message)));
+		Codecast.WriteLine(JsonUtility.ToJson(Andtech.Codecast.UnityLogEntry.Log(message)));
 	}
 
 	[Button]
 	public void SendWarning()
 	{
-		Codecast.WriteLine(JsonUtility.ToJson(UnityLogEntry.Warning(message)));
+		Codecast.WriteLine(JsonUtility.ToJson(Andtech.Codecast.UnityLogEntry.Warning(message)));
 	}
 
 	[Button]
 	public void SendError()
 	{
-		Codecast.WriteLine(JsonUtility.ToJson(UnityLogEntry.Error(message)));
+		Codecast.WriteLine(JsonUtility.ToJson(Andtech.Codecast.UnityLogEntry.Error(message)));
 	}
 
 	[Button]
