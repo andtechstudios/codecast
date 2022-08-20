@@ -2,9 +2,10 @@
   "dependencies": {
     "com.cysharp.unitask": "2.3.1",
     "com.dbrizov.naughtyattributes": "2.1.4",
-    "com.unity.ide.visualstudio": "2.0.14",
+    "com.unity.ide.visualstudio": "2.0.15",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.ugui": "1.0.0",
+    "org.nuget.watson-tcp": "4.8.1-4.14",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -45,6 +46,13 @@
         "com.cysharp.unitask",
         "com.dbrizov.naughtyattributes",
         "com.needle.compilation-visualizer"
+      ]
+    },
+    {
+      "name": "Andtech Studios",
+      "url": "https://gitlab.com/api/v4/projects/38688899/packages/npm/",
+      "scopes": [
+        "org.nuget"
       ]
     }
   ]
