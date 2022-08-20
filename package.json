@@ -7,6 +7,9 @@
 		"email": "andtechstudios@gmail.com",
 		"url": "https://github.com/andtechstudios"
 	},
+	"dependencies": {
+		"org.nuget.watson-tcp": "4.8.1-4.14"
+	},
 	"samples": [
 		{
 			"displayName": "Singleton Wrapper Example",
@@ -14,5 +17,5 @@
 			"path": "Samples~/Singleton Wrapper Example"
 		}
 	],
-	"version": "0.10.2"
+	"version": "0.11.0"
 }
